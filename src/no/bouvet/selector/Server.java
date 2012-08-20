@@ -12,20 +12,19 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- * User: Reidar Sollid
- * Date: 8/19/12
- * Time: 1:15 PM
- */
 public class Server {
+    private Logger logger = Logger.getLogger(Server.class.getName());
     private CharsetDecoder decoder;
 
     public Server() {
+        ServerSocketChannel serverSocketChannel = null;
         try {
             Charset charset = Charset.forName("ISO-8859-1");
             decoder = charset.newDecoder();
-            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.bind(new InetSocketAddress(9999));
             Selector selector = Selector.open();
             while (!Thread.currentThread().isInterrupted()) {
@@ -34,25 +33,31 @@ public class Server {
                 socketChannel.register(selector, SelectionKey.OP_READ);
                 handleServerSocket(selector);
             }
-
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, e.getMessage(), e);
+        } finally {
+            assert serverSocketChannel != null;
+            try {
+                serverSocketChannel.close();
+            } catch (IOException e) {
+                logger.log(Level.WARNING, "What to do ??", e);
+            }
         }
     }
 
     private void handleServerSocket(Selector selector) throws IOException {
         int select = selector.select();
-        if (select == 1) {
+        if (select != 0) {
             Set<SelectionKey> selectionKeys = new CopyOnWriteArraySet<>(selector.selectedKeys());
             ByteBuffer byteBuffer = ByteBuffer.allocate(255);
             byteBuffer.clear();
             for (SelectionKey selectionKey : selectionKeys) {
+                selectionKeys.remove(selectionKey);
                 SocketChannel channel = (SocketChannel) selectionKey.channel();
                 channel.read(byteBuffer);
                 byteBuffer.flip();
                 CharBuffer charBuffer = decoder.decode(byteBuffer);
-                System.out.println(charBuffer.toString());
-                selectionKeys.remove(selectionKey);
+                logger.log(Level.INFO, charBuffer.toString());
             }
         }
     }

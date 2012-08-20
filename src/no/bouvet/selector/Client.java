@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- * User: Reidar Sollid
- * Date: 8/19/12
- * Time: 1:15 PM
- */
 public class Client {
+    private Logger logger = Logger.getLogger(Client.class.getName());
+
     public Client() {
         SocketChannel socketChannel = null;
         try {
@@ -22,13 +21,13 @@ public class Client {
                 socketChannel.write(byteBuffer);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, e.getMessage(), e);
         } finally {
             if (socketChannel != null) {
                 try {
                     socketChannel.close();
                 } catch (IOException e) {
-                    System.out.println("What to do???");
+                    logger.log(Level.WARNING, "What to do???", e);
                 }
             }
         }
