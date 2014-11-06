@@ -1,4 +1,4 @@
-package no.bouvet.async;
+package com.reidarsollid.async;
 
 import java.io.IOException;
 import java.net.InetAddress;

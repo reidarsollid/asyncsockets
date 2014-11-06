@@ -1,4 +1,4 @@
-package no.bouvet.selector;
+package com.reidarsollid.selector;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
